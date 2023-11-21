@@ -12,6 +12,14 @@ TBD
 - [@jadot-bp](https://www.github.com/jadot-bp)
 
 
+## Dependencies
+
+The following packages are required for installation:
+
+- [gphoto]
+- [python-gphoto]
+- [RPI.GPIO]
+
 ## Installation
 
 TBD
