@@ -1,4 +1,4 @@
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 
 # Set GPIO mode
@@ -59,5 +59,3 @@ def Reverse(delay: float, steps: int):
         for j in range(StepCount):
             SetStep(Seq[j][0], Seq[j][1], Seq[j][2], Seq[j][3])
             time.sleep(delay)
-
-
