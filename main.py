@@ -28,10 +28,10 @@ def main(camera_active=True):
     step_counter = 0
     frame_counter = 0    
 
-    sprocket_freqs = []
-    sp_freq = 0
-
     last_state = False   # Last sensor state
+
+    shutter_steps = []   # Track steps per frame (shutter release)
+    last_shutter = 0     # Steps since last shutter
 
     while True: 
 
@@ -52,31 +52,35 @@ def main(camera_active=True):
                 print("Shutter released.")                
 
             if frame_counter > 0:
-                print(f"Frame Captured [{frame_counter}] -- sp_freq = {sprocket_freqs[-1]}")
+                print(f"Frame Captured [{frame_counter}] -- steps = {last_shutter}")
             else:
                 print(f"Frame Captured [{frame_counter}]")
+            
             frame_counter += 1
+            shutter_steps.append(last_shutter)
+            last_shutter = 0
 
         # Trigger on existing sprocket      
         elif state and last_state:
-            sp_freq += ASTEP    
-        
+            pass    
+ 
         # Trigger on end of sprocket
-        elif last_state and not state   
-            # Update sprocket frequency with last reading
-            sprocket_freqs.append(sp_freq)
-            sp_freq = 0
+        elif last_state and not state:   
+            pass
 
         # Check for sprocket over-run
-        elif not state and not last_state
+        elif not state and not last_state:
 
             if frame_counter < CORR_ZONE:
-                pass 
-            elif sp_freq > (1+ERR_BOUND)*np.median(sprocket_freqs):
+                # No sensor correction outside of correction zone.
+                pass
+ 
+            elif last_shutter > (1+ERR_BOUND)*np.median(shutter_steps):
+                # Apply sensor correction
                 print("Sensor mis-read detected. Capturing frame.")
                 
                 # Calculate new delay
-                new_delay = SPR_DELAY - (sp_freq - np.median(sprocket_freqs))
+                new_delay = SPR_DELAY - (last_shutter - np.median(shutter_steps))
                 ### Shutter release
                 motor.Advance(MOT_DELAY/1000.0, int(new_delay)) 
                 
@@ -90,18 +94,21 @@ def main(camera_active=True):
                 else:
                     print(f"Frame Captured [{frame_counter}]")
                 frame_counter += 1
+                shutter_steps.append(last_shutter)
+                last_shutter = 0
 
-        if sp_freq > MAX_STEPS:
+        if last_shutter > MAX_STEPS:
             print(f"No sprocket detected in {MAX_STEPS} steps. Exiting...")
             sys.exit(1)
 
     
         last_state = state
         step_counter += ASTEP
+        last_shutter += ASTEP
 
 if __name__ == "__main__":
     
     if len(sys.argv) > 1:
-        main(bool(sys.argv[1]))
+        main(bool(int(sys.argv[1])))
     else:
         main()
