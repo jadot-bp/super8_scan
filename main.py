@@ -2,20 +2,18 @@ import motor
 from sensor import Sensor
 from camera import Camera
 
-import numpy as np
-import pandas as pd
-
-def main():
+def main(camera_active=True):
     """Scanner controller main wrapper."""
 
-    DELAY = 0.8        # Stepper motor delay.
+    DELAY = 1        # Stepper motor delay.
     ASTEP = 10          # Number of steps to advance per sprocket query.
 
     # Initialize sensor module
     sensor = Sensor()
 
     # Initialize camera module
-    camera = Camera()
+    if camera_active:
+        camera = Camera()
 
     ### Begin scanning
 
@@ -25,7 +23,7 @@ def main():
     sprocket_freqs = []
     sp_freq = 0
 
-    last_state = None   # Last sensor state
+    last_state = False   # Last sensor state
 
     while True: 
 
@@ -35,29 +33,37 @@ def main():
         # Query sprocket presence
         state = sensor.get_state()
 
-        if state:
-            ### Sprocket detected
-
-            if last_state:
-                sp_freq += ASTEP    
-            else:    
-                ### Shutter release
-                motor.Advance(DELAY/1000.0, 50) 
+        # New sprocket detected
+        if state and not last_state:
+            ### Shutter release
+            motor.Advance(DELAY/1000.0, 250) 
+            
+            if camera_active:
                 camera.capture()
+            if frame_counter > 0:
+                print(f"Frame Captured [{frame_counter}] -- sp_freq = {sprocket_freqs[-1]}")
+            else:
                 print(f"Frame Captured [{frame_counter}]")
-                frame_counter += 1
-        else:
-            if last_state:
-                # Update sprocket frequency with last reading
-                sprocket_freqs.append(sp_freq)
-                sp_freq = 0
+            #input("Ready?"){}
+            frame_counter += 1
+
+        # Trigger on existing sprocket      
+        elif state and last_state:
+            sp_freq += ASTEP    
+        
+        # Trigger on end of sprocket
+        elif last state and not state   
+            # Update sprocket frequency with last reading
+            sprocket_freqs.append(sp_freq)
+            sp_freq = 0
 
         last_state = state
         step_counter += ASTEP
 
-        output = np.asarray(sprocket_freqs)
-        
-        np.savetxt('output.csv', output, delimiter=',')
-
 if __name__ == "__main__":
-    main()
+    import sys
+    
+    if len(sys.argv) > 1:
+        main(bool(sys.argv[1]))
+    else:
+        main()
