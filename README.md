@@ -14,9 +14,9 @@ TBD
 
 The following packages are required for installation:
 
-- [gphoto]
-- [python-gphoto]
-- [RPI.GPIO]
+- [`gphoto`](http://www.gphoto.org/)
+- [`python-gphoto`](https://pypi.org/project/gphoto2/0.8.0/)
+- [`RPi.GPIO`](https://pypi.org/project/RPi.GPIO/)
 
 ## Hardware
 
