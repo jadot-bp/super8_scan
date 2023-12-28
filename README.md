@@ -2,6 +2,8 @@
 
 Utility code for controlling frame advance and shutter release for scanning Super 8 film.
 
+This code is in active development and results may vary-- please feel to reach out with any questions!
+
 ## Documentation
 
 TBD
