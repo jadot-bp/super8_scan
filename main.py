@@ -75,7 +75,7 @@ def main(camera_active=True):
                 # No sensor correction outside of correction zone.
                 pass
  
-            elif last_shutter > (1+ERR_BOUND)*np.median(shutter_steps):
+            elif last_shutter > (1+MAX_DRIFT)*np.median(shutter_steps):
                 # Apply sensor correction
                 print("Sensor mis-read detected. Capturing frame.")
                 
@@ -90,7 +90,7 @@ def main(camera_active=True):
                     print("Shutter released.")
 
                 if frame_counter > 0:
-                    print(f"Frame Captured [{frame_counter}] -- sp_freq = {sprocket_freqs[-1]}")
+                    print(f"Frame Captured [{frame_counter}] -- steps = {last_shutter}")
                 else:
                     print(f"Frame Captured [{frame_counter}]")
                 frame_counter += 1
