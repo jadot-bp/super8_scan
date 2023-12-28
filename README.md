@@ -44,7 +44,7 @@ TBD
 This program is designed to interface with the Raspberry Pi GPIO. The (suggested) pin arrangement is as follows:
 
 | Pin No. | Name | Description |
-|---|---| ---|
+|:---:|:---:| ---|
 | Pin 1  | 3.3V | LED Power |
 | Pin 2  | 5V | Stepper Motor Power |
 | Pin 3  | GPIO 2 | LDR Sense |
