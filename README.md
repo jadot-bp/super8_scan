@@ -1,3 +1,5 @@
+<img src='/logo.png' width='100'>
+
 # Super 8 Helper
 
 Utility code for controlling frame advance and shutter release for scanning Super 8 film.
