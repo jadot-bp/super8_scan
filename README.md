@@ -39,6 +39,8 @@ TBD
 
 ## GPIO Arrangement
 
+![GPIO Arrangement](https://www.raspberrypi.com/documentation/computers/images/GPIO-Pinout-Diagram-2.png)
+
 This program is designed to interface with the Raspberry Pi GPIO. The (suggested) pin arrangement is as follows:
 
 - Pin 1  -- 3.3V (LED Power)
