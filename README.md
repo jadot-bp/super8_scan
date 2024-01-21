@@ -27,8 +27,8 @@ The following packages are required for installation:
 This code is designed to work with the following hardware:
 
 - LM393 Photosensitive LDR Module
-- 28BYJ-48 5V Stepper Motor
-- ULN2003 Motor Driver Board
+- NEMA 17 Stepper Motor
+- L298N Motor Driver Module 12V Motor Driver Board
 - Generic 3V LED
 
 Please note that any changes to the suggested hardware may result in inconsistent operation. The suggested GPIO arrangement (see below) assumes that the stepper coil arrangement is the same as specified in the 28BYJ-48 datasheet. If using a different stepper motor, please consult the manufacturer's own datasheet. The LDR module must be calibrated with LED to ensure that it activates only when the sprocket passes in front of the detector and that LDR activation also coincides with correct positioning of the film frame in the film gate. Our test setup used a blue LED-- other colours may give differing results.
