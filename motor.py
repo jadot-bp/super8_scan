@@ -1,6 +1,11 @@
 import RPi.GPIO as GPIO
 import time
 
+# NEMA 17 Motor has a 1.8deg step angle corresponding to 200 steps/revolution
+# Custom sprocket puller has 20 teeth/revolution (18deg rotational symmetry)
+#
+# Target rotation: 10 steps per sprocket.
+
 # Set GPIO mode
 
 GPIO.setmode(GPIO.BCM)
