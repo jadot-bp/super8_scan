@@ -10,24 +10,22 @@ import time
 def main(camera_active=False):
     """Scanner controller main wrapper."""
 
-    MOT_DELAY = 1    # Stepper motor delay.
-    ASTEP = 10       # Number of steps to advance per sprocket query.
-    CORR_ZONE = 10   # Number of frames to wait before performing sensor
-                     # correction.
-    MAX_DRIFT = 0.2  # Bound on maximum drift before triggering sensor correction
-    SPR_DELAY = 250  # Delay between sensor trigger and shutter release
+    MOT_DELAY = 0.01    # Stepper motor delay.
+    STEP = 44           # Number of steps to advance per sprocket
+    SPROCKET_WAIT = 1   # Time to wait after sprocket advance
+    
     MAX_STEPS = 5000 # Maximum number of steps before system exit.
 
-    SPROCKET_ORDER = []
-    TAKEUP_ORDER = []
+    # GPIO pin ordering for motor
+    SPROCKET_ORDER = [3,2,1,0]
+    TAKEUP_ORDER = [3,2,1,0]
 
+    # GPIO pin numbers
     SPROCKET_GPIO = [17,18,27,22]
-   # TAKEUP_GPIO = [13,16,19,26]
-    
-    #SPROCKET_GPIO = [22,27,18,17]
     TAKEUP_GPIO = [26,19,16,13]
 
     GPIO.setmode(GPIO.BCM) 
+    
     # Initialize camera module
     if camera_active:
         camera = Camera()
@@ -46,21 +44,50 @@ def main(camera_active=False):
 
     # Begin stepping
 
-    for i in range(200):
-        try:   
-            outputs = [*sprocket.step(),*takeup.step()]
+    sprocket_step = 0
+    time_count = 0
+
+    for i in range(int(MAX_STEPS*STEP)):
+        print(sprocket_step,time_count)
+        try:
+
+            # Advance sprocket motor if step not reached   
+            if sprocket_step <= STEP:
+                sprk_seq = sprocket.step()
+
+            # Check if sprocket motor has waited
+            if time_count >= SPROCKET_WAIT:
+                sprocket_step = 0 
+                time_count = 0
+
+            # Advance takeup motor regardless
+            tkup_seq = takeup.step()
+
+            if sprocket_step == STEP:
+                # Only advance takeup
+                pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
+                outputs = [0,0,1,1,*tkup_seq]
+            else:        
+                pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
+                outputs = [*sprk_seq,*tkup_seq]
  
-            for pin,state in zip([*SPROCKET_GPIO,*TAKEUP_GPIO],outputs):
+            for pin,state in zip(pins,outputs):
             
-                print(pin,state)
                 if state == 1:
                     GPIO.output(pin, GPIO.HIGH)
                 else:
                     GPIO.output(pin, GPIO.LOW)
-            time.sleep(0.01)
+
+            time.sleep(MOT_DELAY)
+
+            if sprocket_step < STEP:
+                sprocket_step += 1
+            else:
+                time_count += MOT_DELAY
+            
+
         except KeyboardInterrupt:
             GPIO.cleanup()
-    ### Begin scanning
 
     step_counter = 0
     frame_counter = 0    
