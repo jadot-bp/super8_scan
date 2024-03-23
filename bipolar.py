@@ -13,6 +13,8 @@ class Motor:
         self.order = order
         self.GPIO = GPIO_pins
 
+        self.position = 0
+
     def setup(self):
         """Initialize pin and push low."""
         GPIO.setwarnings(False)
@@ -30,33 +32,18 @@ class Motor:
         if flush:
             GPIO.cleanup()  # Clean up GPIO outputs.
 
-    def step(self, step_count, step_sleep):
+    def step(self):
 
-        out1, out2, out3, out4 = self.GPIO
-        pin1, pin2, pin3, pin4 = self.order
-        
-        for i in range(step_count):
-            if i%4==pin1:
-                GPIO.output( out4, GPIO.HIGH )
-                GPIO.output( out3, GPIO.LOW )
-                GPIO.output( out2, GPIO.LOW )
-                GPIO.output( out1, GPIO.LOW )
-            elif i%4==pin2:
-                GPIO.output( out4, GPIO.LOW )
-                GPIO.output( out3, GPIO.LOW )
-                GPIO.output( out2, GPIO.HIGH )
-                GPIO.output( out1, GPIO.LOW )
-            elif i%4==pin3:
-                GPIO.output( out4, GPIO.LOW )
-                GPIO.output( out3, GPIO.HIGH )
-                GPIO.output( out2, GPIO.LOW )
-                GPIO.output( out1, GPIO.LOW )
-            elif i%4==pin4:
-                GPIO.output( out4, GPIO.LOW )
-                GPIO.output( out3, GPIO.LOW )
-                GPIO.output( out2, GPIO.LOW )
-                GPIO.output( out1, GPIO.HIGH )
-     
-            time.sleep(step_sleep)
+        #sequence = [[0,0,0,1],[0,1,0,0],[0,0,1,0],[1,0,0,0]]
+        sequence = [[0,0,0,1],[0,1,0,1],[0,1,0,0],[0,1,1,0],[0,0,1,0],[1,0,1,0],[1,0,0,0],[1,0,0,1]]
 
-        self.cleanup()
+        # Get step in sequence
+        output = sequence[self.position] 
+
+        # Move to next step
+        self.position += 1
+
+        # Enforce looping of sequence
+        if self.position == len(sequence): self.position = 0
+
+        return output
