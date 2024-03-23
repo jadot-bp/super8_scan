@@ -10,9 +10,9 @@ import time
 def main(camera_active=False):
     """Scanner controller main wrapper."""
 
-    MOT_DELAY = 0.01    # Stepper motor delay.
-    STEP = 44           # Number of steps to advance per sprocket
-    SPROCKET_WAIT = 1   # Time to wait after sprocket advance
+    MOT_DELAY = 0.02    # Stepper motor delay.
+    STEP = 41           # Number of steps to advance per sprocket
+    SPROCKET_WAIT = 0.4   # Time to wait after sprocket advance
     
     MAX_STEPS = 5000 # Maximum number of steps before system exit.
 
@@ -52,7 +52,7 @@ def main(camera_active=False):
         try:
 
             # Advance sprocket motor if step not reached   
-            if sprocket_step <= STEP:
+            if sprocket_step < STEP:
                 sprk_seq = sprocket.step()
 
             # Check if sprocket motor has waited
@@ -66,7 +66,7 @@ def main(camera_active=False):
             if sprocket_step == STEP:
                 # Only advance takeup
                 pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
-                outputs = [0,0,1,1,*tkup_seq]
+                outputs = [0,0,0,0,*tkup_seq]
             else:        
                 pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
                 outputs = [*sprk_seq,*tkup_seq]
