@@ -17,7 +17,8 @@ class Camera:
 
     def capture(self):
         self.camera.init()
-        file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
+        self.camera.trigger_capture()
+        #file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
         #print('Camera file path: {0}/{1}'.format(file_path.folder, file_path.name))
         #target = os.path.join('/tmp','test.img')
         #print('Copying image to', target)
