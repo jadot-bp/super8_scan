@@ -26,19 +26,18 @@ The following packages are required for installation:
 
 This code is designed to work with the following hardware:
 
-- LM393 Photosensitive LDR Module
-- NEMA 17 Stepper Motor
-- L298N Motor Driver Module 12V Motor Driver Board
-- Generic 3V LED
+- 2x NEMA 17 Stepper Motor
+- 2x L298N Motor Driver Module 12V Motor Driver Board
+- A `gphoto`-compatible camera of your choice
 
-Please note that any changes to the suggested hardware may result in inconsistent operation. The suggested GPIO arrangement (see below) assumes that the stepper coil arrangement is the same as specified in the 28BYJ-48 datasheet. If using a different stepper motor, please consult the manufacturer's own datasheet. The LDR module must be calibrated with LED to ensure that it activates only when the sprocket passes in front of the detector and that LDR activation also coincides with correct positioning of the film frame in the film gate. Our test setup used a blue LED-- other colours may give differing results.
+Please note that any changes to the suggested hardware may result in inconsistent operation. The suggested GPIO arrangement (see below) assumes that the stepper coil arrangement is the same as specified in the 28BYJ-48 datasheet. If using a different stepper motor, please consult the manufacturer's own datasheet.
 
 ## Installation
 
-TBD
+Running the Super8 Scanner is as simple as executing the following binary:
 
 ```bash
-  TBD
+  ./super8_scan
 ```
 
 ## GPIO Arrangement
@@ -47,18 +46,20 @@ TBD
 
 This program is designed to interface with the Raspberry Pi GPIO. The (suggested) pin arrangement is as follows:
 
+<center>
 | Pin No. | Name | Description |
 |:---:|:---:| ---|
-| Pin 1  | 3.3V | LED Power |
-| Pin 2  | 5V | Stepper Motor Power |
-| Pin 3  | GPIO 2 | LDR Sense |
-| Pin 6  | GND | LED Ground |
-| Pin 7  | GPIO 4 | Stepper Board IN2 |
-| Pin 9  | GND | LDR Ground |
-| Pin 11 | GPIO 17 | Stepper Board IN4 |
-| Pin 14 | GND | Stepper Motor Ground |
-| Pin 16 | GPIO 23 | Stepper Board IN1 |
-| Pin 17 | 3.3V | LDR Power |
-| Pin 18 | GPIO 24 | Stepper Board IN 3 |
+| Pin 1  | 3.3V | Contact Sensor Power |
+| Pin 4  | GPIO 2 | Contact Sensor Sense |
+| Pin 21 | GPIO 9 | Stepper L298N IN2 |
+| Pin 22 | GPIO 25 | Stepper L298N IN4 |
+| Pin 23 | GPIO 11 | Stepper L298N IN1 |
+| Pin 24 | GPIO 8 | Stepper L298N IN3 |
+| Pin 35 | GPIO 19 | Takeup L298N IN2 |
+| Pin 36 | GPIO 16 | Takeup L298N IN4 |
+| Pin 37 | GPIO 26 | Takeup L298N IN1 |
+| Pin 38 | GPIO 20 | Takeup L298N IN3 |
+| Pin 39 | GND | L298N Ground |
+</center>
 
-Changes to the suggested pin arrangement will require updating the assigned pins in the codebase.
+Changes to the suggested pin arrangement will require updating the assigned pins in the code.
