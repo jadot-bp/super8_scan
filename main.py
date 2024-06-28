@@ -1,34 +1,50 @@
 from bipolar import Motor
 from camera import Camera
+from sensor import Sensor
 
-import multiprocessing as mp
 import sys
 import RPi.GPIO as GPIO
 
 import time
 
+
+def advance(pins,outputs,delay):
+    # Turn motors
+    for pin,state in zip(pins,outputs):    
+        if state == 1:
+            GPIO.output(pin, GPIO.HIGH)
+        else:
+            GPIO.output(pin, GPIO.LOW)
+    time.sleep(delay)
+
 def main(camera_active=False):
     """Scanner controller main wrapper."""
 
-    MOT_DELAY = 0.01    # Stepper motor delay.
-    STEP = 44           # Number of steps to advance per sprocket
-    SPROCKET_WAIT = 1   # Time to wait after sprocket advance
-    
-    MAX_STEPS = 5000 # Maximum number of steps before system exit.
+    MOT_DELAY = 0.0025    # Stepper motor delay.
+    STEP = 404          # Number of steps to advance per sprocket
+    TENSION_STEP_COUNT = 10 # Number of steps to advance takeup spool to maintain tension
+    CONTACT_DEAD_PERIOD = 50 # Number of steps to wait before reactivating contact sensor
+
+    MAX_FRAMES = 5000 # Maximum number of frames before system exit.
 
     # GPIO pin ordering for motor
+    TAKEUP_ORDER = [0,1,2,3]
     SPROCKET_ORDER = [3,2,1,0]
-    TAKEUP_ORDER = [3,2,1,0]
 
     # GPIO pin numbers
-    SPROCKET_GPIO = [17,18,27,22]
-    TAKEUP_GPIO = [26,19,16,13]
+    SPROCKET_GPIO = [11,8,9,25]
+    TAKEUP_GPIO = [26,20,19,16]
+
+    pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
 
     GPIO.setmode(GPIO.BCM) 
     
-    # Initialize camera module
+    # Initialise camera module
     if camera_active:
         camera = Camera()
+
+    # Initialise contact sensor
+    sensor = Sensor()
 
     # Initialise motors
 
@@ -37,73 +53,59 @@ def main(camera_active=False):
 
     # Initialise GPIO
 
-    for pin in [*SPROCKET_GPIO,*TAKEUP_GPIO]:
-        print(pin)
+    for pin in pins:
         GPIO.setup(pin, GPIO.OUT)
         GPIO.output(pin, GPIO.LOW) 
 
     # Begin stepping
 
-    sprocket_step = 0
-    time_count = 0
+    snap_count = 1
+    frame_count = 0
+    sprocket_step_count = 400
+    sprocket_steps = []
 
-    for i in range(int(MAX_STEPS*STEP)):
-        print(sprocket_step,time_count)
+    while frame_count < MAX_FRAMES:
         try:
 
-            # Advance sprocket motor if step not reached   
-            if sprocket_step <= STEP:
-                sprk_seq = sprocket.step()
+            # check state of contact sensor
+            state = sensor.get_state()
 
-            # Check if sprocket motor has waited
-            if time_count >= SPROCKET_WAIT:
-                sprocket_step = 0 
-                time_count = 0
+            if state and sprocket_step_count > CONTACT_DEAD_PERIOD:   # Claw cam at start of cycle
+               
+                sprocket_steps.append(sprocket_step_count)
+                sprocket_step_count = 0
 
-            # Advance takeup motor regardless
-            tkup_seq = takeup.step()
+                for step in range(TENSION_STEP_COUNT):
+                    tkup_seq = takeup.step()
 
-            if sprocket_step == STEP:
-                # Only advance takeup
-                pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
-                outputs = [0,0,1,1,*tkup_seq]
-            else:        
-                pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
-                outputs = [*sprk_seq,*tkup_seq]
- 
-            for pin,state in zip(pins,outputs):
-            
-                if state == 1:
-                    GPIO.output(pin, GPIO.HIGH)
-                else:
-                    GPIO.output(pin, GPIO.LOW)
+                    # Only advance takeup motor
+                    outputs = [0,0,1,1,*tkup_seq]
 
-            time.sleep(MOT_DELAY)
+                    advance(pins, outputs, MOT_DELAY)
 
-            if sprocket_step < STEP:
-                sprocket_step += 1
+                # capture
+                if camera_active:
+                    camera.capture()
+                    snap_count += 1
+
+                print("Mean steps: {:.2f}".format(sum(sprocket_steps)/len(sprocket_steps)))
+                frame_count += 1
+
             else:
-                time_count += MOT_DELAY
+                sprk_seq = sprocket.step()
+                tkup_seq = takeup.step()
+
+                outputs = [*sprk_seq,*tkup_seq]
+                advance(pins, outputs,MOT_DELAY)
             
+            sprocket_step_count += 1
 
         except KeyboardInterrupt:
             GPIO.cleanup()
 
-    step_counter = 0
-    frame_counter = 0    
-
-    shutter_steps = []   # Track steps per frame (shutter release)
-    last_shutter = 0     # Steps since last shutter
-
     GPIO.cleanup()
     
     exit()
-    while True: 
-
-        # Advance motor
-
-        if camera_active:
-            camera.capture()
 
 if __name__ == "__main__":
     
