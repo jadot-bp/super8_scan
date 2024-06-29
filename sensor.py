@@ -5,7 +5,7 @@ SENSOR_PIN = 14  # GPIO 14
 
 class Sensor:
     """
-        LDR control code.
+        Contact sensor control code.
     """
 
     sensor_pin = SENSOR_PIN
