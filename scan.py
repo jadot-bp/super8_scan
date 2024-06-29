@@ -7,6 +7,21 @@ import RPi.GPIO as GPIO
 
 import time
 
+MOT_DELAY = 0.0025    # Stepper motor delay.
+TENSION_STEP_COUNT = 10 # Number of steps to advance takeup spool to maintain tension
+CONTACT_DEAD_PERIOD = 50 # Number of steps to wait before reactivating contact sensor
+
+MAX_FRAMES = 5000 # Maximum number of frames before system exit.
+
+# GPIO pin ordering for motor
+TAKEUP_ORDER = [0,1,2,3]
+SPROCKET_ORDER = [3,2,1,0]
+
+# GPIO pin numbers
+SPROCKET_GPIO = [11,8,9,25]
+TAKEUP_GPIO = [26,20,19,16]
+
+def get_pins(): return [*SPROCKET_GPIO,*TAKEUP_GPIO]
 
 def advance(pins,outputs,delay):
     # Turn motors
@@ -19,21 +34,6 @@ def advance(pins,outputs,delay):
 
 def main(camera_active=False):
     """Scanner controller main wrapper."""
-
-    MOT_DELAY = 0.0025    # Stepper motor delay.
-    STEP = 404          # Number of steps to advance per sprocket
-    TENSION_STEP_COUNT = 10 # Number of steps to advance takeup spool to maintain tension
-    CONTACT_DEAD_PERIOD = 50 # Number of steps to wait before reactivating contact sensor
-
-    MAX_FRAMES = 5000 # Maximum number of frames before system exit.
-
-    # GPIO pin ordering for motor
-    TAKEUP_ORDER = [0,1,2,3]
-    SPROCKET_ORDER = [3,2,1,0]
-
-    # GPIO pin numbers
-    SPROCKET_GPIO = [11,8,9,25]
-    TAKEUP_GPIO = [26,20,19,16]
 
     pins = [*SPROCKET_GPIO,*TAKEUP_GPIO]
 
