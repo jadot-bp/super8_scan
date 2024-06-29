@@ -18,6 +18,7 @@ TBD
 
 The following packages are required for installation:
 
+- [`tkinter`](https://pypi.org/project/tk/)
 - [`gphoto`](http://www.gphoto.org/)
 - [`python-gphoto`](https://pypi.org/project/gphoto2/0.8.0/)
 - [`RPi.GPIO`](https://pypi.org/project/RPi.GPIO/)
@@ -34,7 +35,7 @@ Please note that any changes to the suggested hardware may result in inconsisten
 
 ## Installation
 
-Running the Super8 Scanner is as simple as executing the following binary:
+Once the dependencies have been installed, running the Super8 Scanner is as simple as executing the following binary:
 
 ```bash
   ./super8_scan
