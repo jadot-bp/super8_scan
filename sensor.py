@@ -23,3 +23,5 @@ class Sensor:
     def get_state(self):
         return GPIO.input(self.sensor_pin)
 
+    def clean_up(self):
+        return GPIO.cleanup()
