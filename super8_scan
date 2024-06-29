@@ -1,0 +1,120 @@
+#!/usr/bin/python3
+
+import tkinter as tk
+
+import scan
+from sensor import Sensor
+from bipolar import Motor
+
+def get_data(object):
+    print(object.get())
+    
+def start_scan():
+    scan.main()
+
+def motor(n):
+    pins = scan.get_pins()[:4]
+
+    GPIO.setmode(GPIO.BCM)
+    sprocket = Motor(scan.SPROCKET_ORDER,scan.SPROCKET_GPIO)
+    
+    for pin in pins
+        GPIO.setup(pin,GPIO.OUT)
+        GPIO.output(pin,GPIO.LOW)
+
+    if n < 0: pins = pins[::-1]
+
+    for i in range(n):
+        scan.advance(pins,sprocket.step())
+
+    GPIO.cleanup()
+
+def advance(n=1):
+    print("advancing", n)
+    motor(n)
+    return None
+
+def reverse(n=1):
+    print("reversing",n)
+    motor(n)
+    return None
+
+def reset_claw():
+    sensor = Sensor()
+    print("Resetting position...")
+    while not sensor.get_state():
+        advance()
+    return None
+
+def main():
+
+    root = tk.Tk()
+    root.title("Super 8 Scanner")
+    root.geometry("350x150")
+
+    img = tk.PhotoImage(file="logo.png")
+    root.iconphoto(True, img)
+
+    # Fine adjustment frame
+
+    control_frame = tk.Frame(root)
+    control_frame.pack()
+
+    tk.Label(control_frame, text="Enter number of steps to move:").pack()
+
+    entry = tk.Entry(control_frame)
+    entry.insert(0,"0")
+    entry.pack()
+
+    direction_status = tk.IntVar()
+
+    forward = tk.Radiobutton(control_frame, text="Forward", variable=direction_status, value=1)
+    forward.pack(side=tk.LEFT)
+
+    backward = tk.Radiobutton(control_frame, text="Backward", variable=direction_status, value=0)
+    backward.pack(side=tk.LEFT)
+
+    submit = tk.Button(control_frame, text="Go", command=lambda: get_data(entry))
+    submit.pack(side=tk.LEFT)
+
+    start = tk.Button(control_frame, text="Scan", command=start_scan)
+    start.pack()
+
+    #
+
+    frame = tk.Frame(root)
+    frame.pack()
+
+    left_adjust1 = tk.Button(frame, text="-100", command=lambda: reverse(-100))
+    left_adjust1.grid(row=0,column=1)
+
+    left_adjust2 = tk.Button(frame, text="-200", command=lambda: reverse(-200))
+    left_adjust2.grid(row=0,column=0)
+
+    reset = tk.Button(frame, text="Reset", command=reset_claw())
+    reset.grid(row=0,column=2)
+
+    right_adjust1 = tk.Button(frame, text="+100", command=lambda: advance(100))
+    right_adjust1.grid(row=0,column=3)
+
+    right_adjust2 = tk.Button(frame, text="+200", command=lambda: advance(200))
+    right_adjust2.grid(row=0,column=4)
+
+    log_frame = tk.Frame(root)
+    log_frame.pack()
+
+    tk.Label(log_frame, text="Log").pack()
+
+    scrollbar = tk.Scrollbar(log_frame)
+    log = tk.Text(log_frame, height=5, width=52, yscrollcommand=scrollbar.set,state="disabled")
+    scrollbar.config(command=log.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    #log.config(state=tk.DISABLED)
+    log.pack(side="left")
+
+    tk.mainloop()
+
+if __name__ == "__main__":
+    main()
+
+
