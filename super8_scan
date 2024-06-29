@@ -2,51 +2,56 @@
 
 import tkinter as tk
 
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BCM)
+
 import scan
 from sensor import Sensor
 from bipolar import Motor
+import time
+import sys
 
 def get_data(object):
-    print(object.get())
+    motor(int(object.get()))
     
 def start_scan():
     scan.main()
 
-def motor(n):
-    pins = scan.get_pins()[:4]
+def motor(n=1):
+    global pins
+    global sprocket
 
-    GPIO.setmode(GPIO.BCM)
-    sprocket = Motor(scan.SPROCKET_ORDER,scan.SPROCKET_GPIO)
+    if n < 0: pins.reverse()
+
+    for i in range(abs(n)):
+        sprk_seq = sprocket.step()
+        for pin, state in zip(pins,sprk_seq):
+            if state == 1:
+                GPIO.output(pin,GPIO.HIGH)
+            else:
+                GPIO.output(pin, GPIO.LOW)
+        time.sleep(scan.MOT_DELAY)
     
-    for pin in pins
-        GPIO.setup(pin,GPIO.OUT)
-        GPIO.output(pin,GPIO.LOW)
-
-    if n < 0: pins = pins[::-1]
-
-    for i in range(n):
-        scan.advance(pins,sprocket.step())
-
-    GPIO.cleanup()
-
-def advance(n=1):
-    print("advancing", n)
-    motor(n)
-    return None
-
-def reverse(n=1):
-    print("reversing",n)
-    motor(n)
-    return None
-
 def reset_claw():
     sensor = Sensor()
     print("Resetting position...")
     while not sensor.get_state():
-        advance()
+        motor()
     return None
 
+
 def main():
+
+    global pins
+    pins = scan.get_pins()[:4]
+
+    global sprocket
+    sprocket = Motor(scan.SPROCKET_ORDER,scan.SPROCKET_GPIO)
+
+    for pin in pins:
+        GPIO.setup(pin,GPIO.OUT)
+        GPIO.output(pin,GPIO.LOW)
 
     root = tk.Tk()
     root.title("Super 8 Scanner")
@@ -74,7 +79,7 @@ def main():
     backward = tk.Radiobutton(control_frame, text="Backward", variable=direction_status, value=0)
     backward.pack(side=tk.LEFT)
 
-    submit = tk.Button(control_frame, text="Go", command=lambda: get_data(entry))
+    submit = tk.Button(control_frame, text="Go", command=lambda: motor(int(entry.get())))
     submit.pack(side=tk.LEFT)
 
     start = tk.Button(control_frame, text="Scan", command=start_scan)
@@ -85,19 +90,19 @@ def main():
     frame = tk.Frame(root)
     frame.pack()
 
-    left_adjust1 = tk.Button(frame, text="-100", command=lambda: reverse(-100))
+    left_adjust1 = tk.Button(frame, text="-100", command=lambda: motor(-100))
     left_adjust1.grid(row=0,column=1)
 
-    left_adjust2 = tk.Button(frame, text="-200", command=lambda: reverse(-200))
+    left_adjust2 = tk.Button(frame, text="-200", command=lambda: motor(-200))
     left_adjust2.grid(row=0,column=0)
 
-    reset = tk.Button(frame, text="Reset", command=reset_claw())
+    reset = tk.Button(frame, text="Reset", command=lambda:reset_claw())
     reset.grid(row=0,column=2)
 
-    right_adjust1 = tk.Button(frame, text="+100", command=lambda: advance(100))
+    right_adjust1 = tk.Button(frame, text="+100", command=lambda: motor(100))
     right_adjust1.grid(row=0,column=3)
 
-    right_adjust2 = tk.Button(frame, text="+200", command=lambda: advance(200))
+    right_adjust2 = tk.Button(frame, text="+200", command=lambda: motor(200))
     right_adjust2.grid(row=0,column=4)
 
     log_frame = tk.Frame(root)
