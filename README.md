@@ -48,8 +48,9 @@ Once the dependencies have been installed, running the Super8 Scanner is as simp
 This program is designed to interface with the Raspberry Pi GPIO. The (suggested) pin arrangement is as follows:
 
 <center>
+  
 | Pin No. | Name | Description |
-|:---:|:---:| ---|
+|:---:|:---:|---|
 | Pin 1  | 3.3V | Contact Sensor Power |
 | Pin 4  | GPIO 2 | Contact Sensor Sense |
 | Pin 21 | GPIO 9 | Stepper L298N IN2 |
@@ -62,5 +63,6 @@ This program is designed to interface with the Raspberry Pi GPIO. The (suggested
 | Pin 38 | GPIO 20 | Takeup L298N IN3 |
 | Pin 39 | GND | L298N Ground |
 </center>
+
 
 Changes to the suggested pin arrangement will require updating the assigned pins in the code.
